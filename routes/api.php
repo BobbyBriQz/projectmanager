@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,17 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/', function (){
+    return response([
+        'data' => 'Project manager home'
+    ], 200);
+});
+
+Route::get('/users', 'UserController@users');
+Route::get('/user/{id}', 'UserController@getUser');
+Route::post('/insertUser', 'UserController@insertUser');
+Route::patch('/user/{id}', 'UserController@updateUserInfo');
+Route::delete('/user/{id}', 'UserController@deleteUser');
+Route::get('/users/deleted', 'UserController@deletedUsers');
+Route::get('/users/recoverDeleted', 'UserController@recoverDeletedUsers');
