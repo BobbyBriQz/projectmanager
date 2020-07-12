@@ -24,10 +24,15 @@ Route::get('/', function (){
     ], 200);
 });
 
+Route::post('/register', 'AuthController@register');
+Route::post('/login', 'AuthController@login');
 Route::get('/users', 'UserController@users');
-Route::get('/user/{id}', 'UserController@getUser');
-Route::post('/insertUser', 'UserController@insertUser');
-Route::patch('/user/{id}', 'UserController@updateUserInfo');
-Route::delete('/user/{id}', 'UserController@deleteUser');
-Route::get('/users/deleted', 'UserController@deletedUsers');
-Route::get('/users/recoverDeleted', 'UserController@recoverDeletedUsers');
+
+Route::group(['middleware' => ['auth.pm']], function (){
+    Route::get('/user/{id}', 'UserController@getUser');
+    Route::patch('/user/{id}', 'UserController@updateUserInfo');
+    Route::delete('/user/{id}', 'UserController@deleteUser');
+    Route::get('/users/deleted', 'UserController@deletedUsers');
+    Route::get('/users/recoverDeleted', 'UserController@recoverDeletedUsers');
+});
+
