@@ -9,4 +9,9 @@ class Task extends Model
 {
     //
     use SoftDeletes;
+
+    public function project(){
+
+        return $this->belongsTo('\App\Model\Project');
+    }
 }

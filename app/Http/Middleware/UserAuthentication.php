@@ -25,7 +25,6 @@ class UserAuthentication
                 return response()->json(['error' => 'user_not_found'], 404);
             }
 
-            return response()->json(['token_user' => $user], 200);
         } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
 
             return response()->json(['error' => 'token_expired'], 400);
