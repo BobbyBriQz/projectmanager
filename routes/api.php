@@ -33,16 +33,17 @@ Route::post('/login', 'AuthController@login');
 Route::get('/users', 'UserController@users');
 
 Route::group(['middleware' => ['auth.pm']], function (){
-    Route::get('/projects', function(){
 
-        $token = JWTAuth::parseToken()->getToken();
-        $user = JWTAuth::toUser($token);
 
-          $projects = User::find($user->id)->projects;
+    Route::post('project/{project_id}/task/create', 'TaskController@create');
+    Route::get('project/{project_id}/task/{task_id}/change-status', 'TaskController@changeCompletedStatus');
+    Route::delete('project/{project_id}/task/{task_id}/delete', 'TaskController@delete');
+    Route::get('project/{project_id}/task/{task_id}/recover', 'TaskController@restore');
+    Route::get('project/{project_id}/tasks/recover', 'TaskController@restoreAllInProject');
 
-          return $projects->load('tasks', 'users');
 
-    });
+    Route::get('/projects', 'ProjectController@projects');
+    Route::get('/projects-sql', 'ProjectController@projectsSQL');
 
     Route::post('/project/create', 'ProjectController@create');
     Route::patch('/project/{id}/update', 'ProjectController@update');

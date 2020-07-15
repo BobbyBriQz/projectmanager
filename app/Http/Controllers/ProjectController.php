@@ -273,4 +273,92 @@ class ProjectController extends Controller
             ], 400);
         }
     }
+
+    public function projects(){
+
+        $token = JWTAuth::parseToken()->getToken();
+        $token_user = JWTAuth::toUser($token);
+
+        $user = User::find($token_user->id);
+
+        if(!is_null($user)) {
+
+            $projects = User::find($user->id)->projects;
+
+            return Response([
+                'status' => true,
+                'message' => 'Retrieved user\'s projects',
+                'projects' => $projects->load('tasks', 'users')
+            ], 200);
+
+        }else{
+            return Response([
+                'status' => false,
+                'message' => 'Failed to retrieve project',
+                'error' => 'Project does not exist'
+            ], 400);
+        }
+    }
+
+    /*
+     * I wrote this method which does exactly what the projects() method does but in raw sql
+     * Just to fully understand how eloquent's load() method nests data
+     * */
+    public function projectsSQL(){
+        $token = JWTAuth::parseToken()->getToken();
+        $token_user = JWTAuth::toUser($token);
+
+        $user_id = $token_user->id;
+        $user = DB::select("select * from users where id = ? limit 1 ", [$user_id]);
+
+        //Get projects with user id
+        //For each project load both tasks and users
+        //Make sure data is well formatted
+
+        if(!is_null($user)) {
+
+            $projects = DB::select("select * from projects 
+                    where id 
+                    in (select project_id from project_user where user_id = ?) ", [$user_id]);
+
+            $formattedArray = [];
+            foreach($projects as $project){
+                //Get tasks
+                $tasks = DB::select("select * from tasks where project_id = ?", [$project->id]);
+
+                //Get users
+                $users = DB::select("select * from users where id 
+                                    in (select user_id from project_user where  project_id)", [$project->id]);
+
+                $project = [
+                    'id' => $project->id,
+                    'name' => $project->name,
+                    'idea' => $project->idea,
+                    'functionality' => $project->id,
+                    'owner_id' => $project->owner_id,
+                    'deleted_at' => $project->deleted_at,
+                    'created_at' => $project->created_at,
+                    'updated_at' => $project->updated_at,
+                    'tasks' => $tasks,
+                    'users' => $users,
+                ];
+
+                array_push($formattedArray, $project);
+            }
+
+            return Response([
+                'status' => true,
+                'message' => 'Retrieved user\'s projects',
+                'projects' => $formattedArray
+            ], 200);
+
+        }else{
+            return Response([
+                'status' => false,
+                'message' => 'Failed to retrieve project',
+                'error' => 'Project does not exist'
+            ], 400);
+        }
+
+    }
 }
